@@ -1,0 +1,33 @@
+#!/usr/bin/php -qC
+<?php
+/**
+* Export a single envfile variable
+* This script is mainly used to export variables to helper programs like GNU-Make
+*
+* Usage: getval <.env file|search dir> <variable>
+*
+*/
+
+$mydir = dirname(__FILE__);
+require("$mydir/envfile.php");
+
+if (count($argv) < 3)
+	die("Usage: getval <file|dir> <variable>\n");
+
+if (is_file($argv[1])) { // ARGV[1] is a file
+	$envFile = $argv[1];
+	$envDir = dirname($envFile);
+} elseif (is_dir($argv[1])) { // ARGV[1] is a directory
+	$envDir = $argv[1];
+	$envFile = "$envDir/.env";
+}
+if (!file_exists($envFile))
+	die(".env file not found in $envDir");
+$envSanity = (file_exists($sanity = "$envDir/.env.example")) ? $sanity : null;
+
+$settings = envfile($envFile, $envSanity, FALSE);
+if (!isset($settings[$argv[2]]))
+	die("Setting: {$argv[2]} not found in $envFile");
+
+echo $settings[$argv[2]];
+?>
